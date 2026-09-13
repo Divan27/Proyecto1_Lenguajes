@@ -51,3 +51,29 @@ void mostrarOpcionNoImplementada(const char *nombreOpcion)
     printf("Esta funcion sera implementada proximamente.\n");
     printf("-----------------------------------------\n");
 }
+
+void mostrarMenuCatalogo(void)
+{
+    printf("\n");
+    printf("=========================================\n");
+    printf("          GESTION DE CATALOGO\n");
+    printf("=========================================\n");
+    printf("1. Incluir catalogo por lote\n");
+    printf("2. Ver todo el catalogo\n");
+    printf("3. Volver\n");
+    printf("=========================================\n");
+}
+
+void mostrarMenuUsuarios(void)
+{
+    printf("\n");
+    printf("=========================================\n");
+    printf("          GESTION DE USUARIOS\n");
+    printf("=========================================\n");
+    printf("1. Crear usuario\n");
+    printf("2. Ver usuarios\n");
+    printf("3. Modificar usuario\n");
+    printf("4. Eliminar usuario\n");
+    printf("5. Volver\n");
+    printf("=========================================\n");
+}

@@ -1,0 +1,48 @@
+{
+	"libros":	[{
+			"id":	1,
+			"nombre":	"Cien años de soledad",
+			"autor":	"Gabriel García Márquez",
+			"anioPublicacion":	1967,
+			"genero":	"Realismo mágico",
+			"resumen":	"Esta novela cuenta la historia",
+			"cantidad":	4,
+			"ejemplares":	[{
+					"identificador":	"LIB-1-EJ-1"
+				}, {
+					"identificador":	"LIB-1-EJ-2"
+				}, {
+					"identificador":	"LIB-1-EJ-3"
+				}, {
+					"identificador":	"LIB-1-EJ-4"
+				}]
+		}, {
+			"id":	2,
+			"nombre":	"1984",
+			"autor":	"George Orwell",
+			"anioPublicacion":	1949,
+			"genero":	"Distopía",
+			"resumen":	"En un futuro totalitario, el protagonista lucha contra el régimen",
+			"cantidad":	3,
+			"ejemplares":	[{
+					"identificador":	"LIB-2-EJ-1"
+				}, {
+					"identificador":	"LIB-2-EJ-2"
+				}, {
+					"identificador":	"LIB-2-EJ-3"
+				}]
+		}, {
+			"id":	3,
+			"nombre":	"Orgullo y prejuicio",
+			"autor":	"Jane Austen",
+			"anioPublicacion":	1813,
+			"genero":	"Novela romántica",
+			"resumen":	"La historia sigue Elizabeth Bennet mientras",
+			"cantidad":	2,
+			"ejemplares":	[{
+					"identificador":	"LIB-3-EJ-1"
+				}, {
+					"identificador":	"LIB-3-EJ-2"
+				}]
+		}]
+}

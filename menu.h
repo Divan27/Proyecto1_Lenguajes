@@ -9,4 +9,8 @@ void mostrarMenuGeneral(void);
 
 void mostrarOpcionNoImplementada(const char *nombreOpcion);
 
+void mostrarMenuCatalogo(void);
+
+void mostrarMenuUsuarios(void);
+
 #endif
