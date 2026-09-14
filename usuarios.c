@@ -146,6 +146,7 @@ int usuarioExiste(
             identificacion) != -1);
 }
 
+
 /* ===================================== */
 /* CREAR USUARIO                         */
 /* ===================================== */
@@ -433,6 +434,39 @@ int eliminarUsuario(
     {
         gestor->usuarios = temporal;
     }
+
+    return 1;
+}
+
+int obtenerNombreUsuario(
+    const GestorUsuarios *gestor,
+    const char *identificacion,
+    const char **nombre)
+{
+    int indice;
+
+    if (
+        gestor == NULL ||
+        identificacion == NULL ||
+        nombre == NULL)
+    {
+        return 0;
+    }
+
+    indice =
+        buscarIndiceUsuario(
+            gestor,
+            identificacion);
+
+    if (indice == -1)
+    {
+        *nombre = NULL;
+
+        return 0;
+    }
+
+    *nombre =
+        gestor->usuarios[indice].nombre;
 
     return 1;
 }
