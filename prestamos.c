@@ -34,6 +34,20 @@ struct GestorPrestamos
     int siguienteId;
 };
 
+typedef struct
+{
+    const char *texto;
+    int cantidad;
+
+} ConteoEstadistica;
+
+typedef struct
+{
+    char periodo[8];
+    double monto;
+
+} RecaudacionEstadistica;
+
 static char *duplicarTextoPrestamo(const char *texto);
 static void liberarPrestamo(Prestamo *prestamo);
 static char *leerArchivoCompletoPrestamos(const char *rutaArchivo);
@@ -46,6 +60,518 @@ static int intervalosTraslapan(
     const char *fin1,
     const char *inicio2,
     const char *fin2);
+
+static int agregarConteoEstadistica(
+    ConteoEstadistica **datos,
+    int *cantidadDatos,
+    const char *texto)
+{
+    ConteoEstadistica *temporal;
+    int i;
+
+    if (
+        datos == NULL ||
+        cantidadDatos == NULL ||
+        texto == NULL)
+    {
+        return 0;
+    }
+
+    for (i = 0; i < *cantidadDatos; i++)
+    {
+        if (
+            strcmp(
+                (*datos)[i].texto,
+                texto) == 0)
+        {
+            (*datos)[i].cantidad++;
+
+            return 1;
+        }
+    }
+
+    temporal =
+        realloc(
+            *datos,
+            (*cantidadDatos + 1) *
+                sizeof(ConteoEstadistica));
+
+    if (temporal == NULL)
+    {
+        return 0;
+    }
+
+    *datos = temporal;
+
+    (*datos)[*cantidadDatos].texto =
+        texto;
+
+    (*datos)[*cantidadDatos].cantidad =
+        1;
+
+    (*cantidadDatos)++;
+
+    return 1;
+}
+
+static int agregarRecaudacionEstadistica(
+    RecaudacionEstadistica **datos,
+    int *cantidadDatos,
+    const char *fechaInicio,
+    double monto)
+{
+    RecaudacionEstadistica *temporal;
+
+    char periodo[8];
+
+    int i;
+
+    if (
+        datos == NULL ||
+        cantidadDatos == NULL ||
+        fechaInicio == NULL ||
+        strlen(fechaInicio) < 7)
+    {
+        return 0;
+    }
+
+    /*
+     * Fecha:
+     * 2026-09-13
+     *
+     * Periodo:
+     * 2026-09
+     */
+
+    memcpy(
+        periodo,
+        fechaInicio,
+        7);
+
+    periodo[7] = '\0';
+
+    for (i = 0; i < *cantidadDatos; i++)
+    {
+        if (
+            strcmp(
+                (*datos)[i].periodo,
+                periodo) == 0)
+        {
+            (*datos)[i].monto += monto;
+
+            return 1;
+        }
+    }
+
+    temporal =
+        realloc(
+            *datos,
+            (*cantidadDatos + 1) *
+                sizeof(RecaudacionEstadistica));
+
+    if (temporal == NULL)
+    {
+        return 0;
+    }
+
+    *datos = temporal;
+
+    strcpy(
+        (*datos)[*cantidadDatos].periodo,
+        periodo);
+
+    (*datos)[*cantidadDatos].monto =
+        monto;
+
+    (*cantidadDatos)++;
+
+    return 1;
+}
+
+static int compararConteoDescendente(
+    const void *a,
+    const void *b)
+{
+    const ConteoEstadistica *primero =
+        a;
+
+    const ConteoEstadistica *segundo =
+        b;
+
+    if (
+        segundo->cantidad !=
+        primero->cantidad)
+    {
+        return
+            segundo->cantidad -
+            primero->cantidad;
+    }
+
+    return strcmp(
+        primero->texto,
+        segundo->texto);
+}
+
+static int compararMontoDescendente(
+    const void *a,
+    const void *b)
+{
+    const RecaudacionEstadistica *primero =
+        a;
+
+    const RecaudacionEstadistica *segundo =
+        b;
+
+    if (
+        segundo->monto >
+        primero->monto)
+    {
+        return 1;
+    }
+
+    if (
+        segundo->monto <
+        primero->monto)
+    {
+        return -1;
+    }
+
+    return strcmp(
+        primero->periodo,
+        segundo->periodo);
+}
+
+void mostrarEstadisticas(
+    const GestorPrestamos *gestor,
+    const Catalogo *catalogo,
+    const GestorUsuarios *usuarios)
+{
+    ConteoEstadistica *producciones = NULL;
+    ConteoEstadistica *usuariosConteo = NULL;
+    ConteoEstadistica *generos = NULL;
+
+    RecaudacionEstadistica *recaudaciones = NULL;
+
+    int cantidadProducciones = 0;
+    int cantidadUsuarios = 0;
+    int cantidadGeneros = 0;
+    int cantidadRecaudaciones = 0;
+
+    int i;
+    int j;
+
+    if (
+        gestor == NULL ||
+        catalogo == NULL ||
+        usuarios == NULL)
+    {
+        return;
+    }
+
+    printf("\n");
+    printf("=========================================\n");
+    printf("               ESTADISTICAS\n");
+    printf("=========================================\n");
+
+    if (gestor->cantidadPrestamos == 0)
+    {
+        printf(
+            "\nNo existen prestamos para "
+            "generar estadisticas.\n");
+
+        return;
+    }
+
+    /*
+     * Recorremos todos los prestamos.
+     */
+
+    for (
+        i = 0;
+        i < gestor->cantidadPrestamos;
+        i++)
+    {
+        const Prestamo *prestamo =
+            &gestor->prestamos[i];
+
+        /*
+         * B.
+         * Cada registro de Prestamo cuenta
+         * como un prestamo para el usuario.
+         */
+
+        agregarConteoEstadistica(
+            &usuariosConteo,
+            &cantidadUsuarios,
+            prestamo->usuario);
+
+        /*
+         * C.
+         * Solo contamos dinero realmente
+         * recaudado.
+         *
+         * El monto se genera al finalizar
+         * la devolucion.
+         */
+
+        if (
+            strcmp(
+                prestamo->estado,
+                "FINALIZADO") == 0 &&
+            prestamo->monto > 0.0)
+        {
+            agregarRecaudacionEstadistica(
+                &recaudaciones,
+                &cantidadRecaudaciones,
+                prestamo->fechaInicio,
+                prestamo->monto);
+        }
+
+        /*
+         * Recorremos cada ejemplar
+         * del prestamo.
+         */
+
+        for (
+            j = 0;
+            j < prestamo->cantidadEjemplares;
+            j++)
+        {
+            const char *genero = NULL;
+
+            /*
+             * A.
+             * Contar producciones.
+             */
+
+            agregarConteoEstadistica(
+                &producciones,
+                &cantidadProducciones,
+                prestamo
+                    ->ejemplares[j]
+                    .nombre);
+
+            /*
+             * D.
+             * Obtenemos el genero del libro
+             * y lo contamos.
+             */
+
+            if (
+                obtenerGeneroPorNombre(
+                    catalogo,
+                    prestamo
+                        ->ejemplares[j]
+                        .nombre,
+                    &genero) &&
+                genero != NULL)
+            {
+                agregarConteoEstadistica(
+                    &generos,
+                    &cantidadGeneros,
+                    genero);
+            }
+        }
+    }
+
+    /*
+     * Ordenar resultados.
+     */
+
+    if (cantidadProducciones > 1)
+    {
+        qsort(
+            producciones,
+            cantidadProducciones,
+            sizeof(ConteoEstadistica),
+            compararConteoDescendente);
+    }
+
+    if (cantidadUsuarios > 1)
+    {
+        qsort(
+            usuariosConteo,
+            cantidadUsuarios,
+            sizeof(ConteoEstadistica),
+            compararConteoDescendente);
+    }
+
+    if (cantidadRecaudaciones > 1)
+    {
+        qsort(
+            recaudaciones,
+            cantidadRecaudaciones,
+            sizeof(RecaudacionEstadistica),
+            compararMontoDescendente);
+    }
+
+    if (cantidadGeneros > 1)
+    {
+        qsort(
+            generos,
+            cantidadGeneros,
+            sizeof(ConteoEstadistica),
+            compararConteoDescendente);
+    }
+
+    /* ================================= */
+    /* A                                 */
+    /* ================================= */
+
+    printf(
+        "\nA. Top 3 de producciones mas prestadas\n");
+
+    printf(
+        "-----------------------------------------\n");
+
+    if (cantidadProducciones == 0)
+    {
+        printf(
+            "No hay producciones prestadas.\n");
+    }
+    else
+    {
+        int limite =
+            cantidadProducciones < 3
+                ? cantidadProducciones
+                : 3;
+
+        for (i = 0; i < limite; i++)
+        {
+            printf(
+                "%d. %s - %d prestamo(s)\n",
+                i + 1,
+                producciones[i].texto,
+                producciones[i].cantidad);
+        }
+    }
+
+    /* ================================= */
+    /* B                                 */
+    /* ================================= */
+
+    printf(
+        "\nB. Top 3 de usuarios con mas prestamos\n");
+
+    printf(
+        "-----------------------------------------\n");
+
+    if (cantidadUsuarios == 0)
+    {
+        printf(
+            "No hay usuarios con prestamos.\n");
+    }
+    else
+    {
+        int limite =
+            cantidadUsuarios < 3
+                ? cantidadUsuarios
+                : 3;
+
+        for (i = 0; i < limite; i++)
+        {
+            const char *nombreUsuario = NULL;
+
+            if (
+                !obtenerNombreUsuario(
+                    usuarios,
+                    usuariosConteo[i].texto,
+                    &nombreUsuario))
+            {
+                nombreUsuario =
+                    usuariosConteo[i].texto;
+            }
+
+            printf(
+                "%d. %s (%s) - %d prestamo(s)\n",
+                i + 1,
+                nombreUsuario,
+                usuariosConteo[i].texto,
+                usuariosConteo[i].cantidad);
+        }
+    }
+
+    /* ================================= */
+    /* C                                 */
+    /* ================================= */
+
+    printf(
+        "\nC. Top 5 de mes-anio con mayor "
+        "monto recaudado\n");
+
+    printf(
+        "-----------------------------------------\n");
+
+    if (cantidadRecaudaciones == 0)
+    {
+        printf(
+            "No hay montos recaudados.\n");
+    }
+    else
+    {
+        int limite =
+            cantidadRecaudaciones < 5
+                ? cantidadRecaudaciones
+                : 5;
+
+        for (i = 0; i < limite; i++)
+        {
+            int anio = 0;
+            int mes = 0;
+
+            sscanf(
+                recaudaciones[i].periodo,
+                "%4d-%2d",
+                &anio,
+                &mes);
+
+            printf(
+                "%d. %02d-%04d - %.2f\n",
+                i + 1,
+                mes,
+                anio,
+                recaudaciones[i].monto);
+        }
+    }
+
+    /* ================================= */
+    /* D                                 */
+    /* ================================= */
+
+    printf(
+        "\nD. Genero con mas y menos prestamos\n");
+
+    printf(
+        "-----------------------------------------\n");
+
+    if (cantidadGeneros == 0)
+    {
+        printf(
+            "No hay generos con prestamos "
+            "generados.\n");
+    }
+    else
+    {
+        printf(
+            "Mas prestado: %s - %d prestamo(s)\n",
+            generos[0].texto,
+            generos[0].cantidad);
+
+        printf(
+            "Menos prestado: %s - %d prestamo(s)\n",
+            generos[cantidadGeneros - 1].texto,
+            generos[cantidadGeneros - 1].cantidad);
+    }
+
+    printf(
+        "=========================================\n");
+
+    free(producciones);
+    free(usuariosConteo);
+    free(generos);
+    free(recaudaciones);
+}
+
 /* Revisa que el ejemplar no este ocupado por otro prestamo en esas fechas. */
 static int ejemplarDisponible(
     const GestorPrestamos *gestor,
@@ -66,6 +592,25 @@ static int calcularTarifas(
     int duracion,
     int *tarifaDia,
     int *tarifaTardia);
+
+static int agregarConteoEstadistica(
+    ConteoEstadistica **datos,
+    int *cantidadDatos,
+    const char *texto);
+
+static int agregarRecaudacionEstadistica(
+    RecaudacionEstadistica **datos,
+    int *cantidadDatos,
+    const char *fechaInicio,
+    double monto);
+
+static int compararConteoDescendente(
+    const void *a,
+    const void *b);
+
+static int compararMontoDescendente(
+    const void *a,
+    const void *b);
 
 GestorPrestamos *crearGestorPrestamos(void)
 {
