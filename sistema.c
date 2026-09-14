@@ -7,6 +7,7 @@
 #include "configuracion.h"
 #include "catalogo.h"
 #include "usuarios.h"
+#include "prestamos.h"
 
 struct Sistema
 {
@@ -15,6 +16,8 @@ struct Sistema
     Catalogo *catalogo;
 
     GestorUsuarios *gestorUsuarios;
+
+    GestorPrestamos *gestorPrestamos;
 };
 
 static void ejecutarMenuPrincipal(Sistema *sistema);
@@ -25,7 +28,8 @@ static void ejecutarMenuOperativo(
 static void ejecutarGestionCatalogo(
     Catalogo *catalogo);
 
-static void ejecutarMenuGeneral(void);
+static void ejecutarMenuGeneral(
+    Sistema *sistema);
 
 static void ejecutarGestionUsuarios(
     GestorUsuarios *gestor);
@@ -98,6 +102,38 @@ Sistema *crearSistema(void)
             "Advertencia: no fue posible cargar usuarios.json\n");
     }
 
+    /* ========================= */
+    /* CREAR GESTOR PRESTAMOS    */
+    /* ========================= */
+
+    /* Se crea el gestor que administrara prestamos y devoluciones. */
+    nuevoSistema->gestorPrestamos =
+        crearGestorPrestamos();
+
+    if (nuevoSistema->gestorPrestamos == NULL)
+    {
+        printf(
+            "Error creando el gestor de prestamos.\n");
+
+        destruirGestorUsuarios(
+            nuevoSistema->gestorUsuarios);
+
+        destruirCatalogo(
+            nuevoSistema->catalogo);
+
+        free(nuevoSistema);
+        return NULL;
+    }
+
+    if (
+        !cargarPrestamosDesdeJson(
+            nuevoSistema->gestorPrestamos,
+            ARCHIVO_PRESTAMOS))
+    {
+        printf(
+            "Advertencia: no fue posible cargar prestamos.json\n");
+    }
+
     return nuevoSistema;
 }
 
@@ -132,7 +168,7 @@ static void ejecutarMenuPrincipal(Sistema *sistema)
 
         case OPCION_MENU_GENERALES:
 
-            ejecutarMenuGeneral();
+            ejecutarMenuGeneral(sistema);
 
             break;
 
@@ -223,7 +259,8 @@ static void ejecutarMenuOperativo(
     }
 }
 
-static void ejecutarMenuGeneral(void)
+static void ejecutarMenuGeneral(
+    Sistema *sistema)
 {
     int opcion = 0;
 
@@ -251,18 +288,151 @@ static void ejecutarMenuGeneral(void)
             break;
 
         case 3:
+        {
+            /* Datos necesarios para registrar un nuevo prestamo. */
+            char *usuario;
+            char *fechaInicio;
+            char *fechaEntrega;
+            char **identificadores;
+            int cantidad;
+            int i;
 
-            mostrarOpcionNoImplementada(
-                "Prestamo de ejemplares");
+            printf("\nIdentificacion del usuario: ");
+            usuario = leerLineaDinamica();
+
+            printf("Fecha de inicio (AAAA-MM-DD): ");
+            fechaInicio = leerLineaDinamica();
+
+            printf("Fecha de entrega (AAAA-MM-DD): ");
+            fechaEntrega = leerLineaDinamica();
+
+            if (
+                usuario == NULL ||
+                fechaInicio == NULL ||
+                fechaEntrega == NULL)
+            {
+                printf("\nNo fue posible leer los datos del prestamo.\n");
+                free(usuario);
+                free(fechaInicio);
+                free(fechaEntrega);
+                break;
+            }
+
+            cantidad = leerEntero(
+                "Cantidad de ejemplares que desea solicitar: ");
+
+            if (cantidad <= 0)
+            {
+                printf("\nLa cantidad debe ser mayor que cero.\n");
+                free(usuario);
+                free(fechaInicio);
+                free(fechaEntrega);
+                break;
+            }
+
+            /* El arreglo es dinamico porque la cantidad la decide el usuario. */
+            identificadores = malloc(
+                cantidad * sizeof(char *));
+
+            if (identificadores == NULL)
+            {
+                printf("\nNo fue posible reservar memoria.\n");
+                free(usuario);
+                free(fechaInicio);
+                free(fechaEntrega);
+                break;
+            }
+
+            for (i = 0; i < cantidad; i++)
+            {
+                printf(
+                    "Identificador del ejemplar %d: ",
+                    i + 1);
+
+                identificadores[i] =
+                    leerLineaDinamica();
+
+                if (identificadores[i] == NULL)
+                {
+                    int j;
+
+                    printf("\nNo fue posible leer el identificador.\n");
+
+                    for (j = 0; j < i; j++)
+                    {
+                        free(identificadores[j]);
+                    }
+
+                    free(identificadores);
+                    identificadores = NULL;
+                    break;
+                }
+            }
+
+            if (identificadores != NULL)
+            {
+                /* La logica y validaciones del prestamo se manejan en prestamos.c. */
+                registrarPrestamo(
+                    sistema->gestorPrestamos,
+                    sistema->catalogo,
+                    sistema->gestorUsuarios,
+                    usuario,
+                    fechaInicio,
+                    fechaEntrega,
+                    identificadores,
+                    cantidad,
+                    ARCHIVO_PRESTAMOS,
+                    ARCHIVO_USUARIOS);
+
+                for (i = 0; i < cantidad; i++)
+                {
+                    free(identificadores[i]);
+                }
+
+                free(identificadores);
+            }
+
+            free(usuario);
+            free(fechaInicio);
+            free(fechaEntrega);
 
             break;
+        }
 
         case 4:
+        {
+            /* Para devolver solo se necesita localizar el prestamo y su fecha real. */
+            char *identificadorPrestamo;
+            char *fechaDevolucion;
 
-            mostrarOpcionNoImplementada(
-                "Devolucion de ejemplar");
+            printf("\nIdentificador del prestamo: ");
+            identificadorPrestamo = leerLineaDinamica();
+
+            printf("Fecha de devolucion (AAAA-MM-DD): ");
+            fechaDevolucion = leerLineaDinamica();
+
+            if (
+                identificadorPrestamo == NULL ||
+                fechaDevolucion == NULL)
+            {
+                printf("\nNo fue posible leer los datos de devolucion.\n");
+                free(identificadorPrestamo);
+                free(fechaDevolucion);
+                break;
+            }
+
+            /* Calcula el monto y cambia el estado del prestamo a FINALIZADO. */
+            registrarDevolucion(
+                sistema->gestorPrestamos,
+                identificadorPrestamo,
+                fechaDevolucion,
+                ARCHIVO_PRESTAMOS);
+
+            free(identificadorPrestamo);
+            free(fechaDevolucion);
 
             break;
+        }
 
         case OPCION_VOLVER_GENERALES:
 
@@ -646,6 +816,9 @@ void destruirSistema(Sistema *sistema)
 
     destruirGestorUsuarios(
         sistema->gestorUsuarios);
+
+    destruirGestorPrestamos(
+        sistema->gestorPrestamos);
 
     free(
         sistema);

@@ -17,6 +17,11 @@ void incluirCatalogoPorLote(
 void mostrarCatalogo(
     const Catalogo *catalogo);
 
+int obtenerNombreEjemplar(
+    const Catalogo *catalogo,
+    const char *identificador,
+    const char **nombreLibro);
+
 void destruirCatalogo(
     Catalogo *catalogo);
 

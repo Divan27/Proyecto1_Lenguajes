@@ -27,6 +27,7 @@
 
 #define ARCHIVO_CATALOGO "catalogo.json"
 #define ARCHIVO_USUARIOS "usuarios.json"
+#define ARCHIVO_PRESTAMOS "prestamos.json"
 
 #define ANIO_MINIMO 1000
 #define ANIO_MAXIMO 2100

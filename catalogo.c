@@ -1475,6 +1475,47 @@ void mostrarCatalogo(
 /* DESTRUIR CATALOGO             */
 /* ============================= */
 
+
+/* ============================= */
+/* BUSCAR EJEMPLAR               */
+/* ============================= */
+
+/* Busca un ejemplar por ID y devuelve el nombre del libro al que pertenece. */
+int obtenerNombreEjemplar(
+    const Catalogo *catalogo,
+    const char *identificador,
+    const char **nombreLibro)
+{
+    int i;
+    int j;
+
+    if (
+        catalogo == NULL ||
+        identificador == NULL ||
+        nombreLibro == NULL)
+    {
+        return 0;
+    }
+
+    for (i = 0; i < catalogo->cantidadLibros; i++)
+    {
+        for (j = 0; j < catalogo->libros[i].cantidad; j++)
+        {
+            if (
+                strcmp(
+                    catalogo->libros[i].ejemplares[j].identificador,
+                    identificador) == 0)
+            {
+                *nombreLibro = catalogo->libros[i].nombre;
+                return 1;
+            }
+        }
+    }
+
+    *nombreLibro = NULL;
+    return 0;
+}
+
 void destruirCatalogo(
     Catalogo *catalogo)
 {
