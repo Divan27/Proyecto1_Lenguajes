@@ -945,8 +945,42 @@ int cargarPrestamosDesdeJson(
     return 1;
 }
 
-static void liberarPrestamo(Prestamo *prestamo)
+int ejemplarEstaDisponible(
+    const GestorPrestamos *gestor,
+    const char *identificadorEjemplar)
 {
+    int i;
+    int j;
+
+    if (gestor == NULL || identificadorEjemplar == NULL)
+    {
+        return 0;
+    }
+
+    for (i = 0; i < gestor->cantidadPrestamos; i++)
+    {
+        const Prestamo *prestamo = &gestor->prestamos[i];
+
+        if (strcmp(prestamo->estado, "FINALIZADO") == 0)
+        {
+            continue;
+        }
+
+        for (j = 0; j < prestamo->cantidadEjemplares; j++)
+        {
+            if (strcmp(
+                    prestamo->ejemplares[j].identificador,
+                    identificadorEjemplar) == 0)
+            {
+                return 0;
+            }
+        }
+    }
+
+    return 1;
+}
+
+static void liberarPrestamo(Prestamo *prestamo){
     int i;
 
     if (prestamo == NULL)
