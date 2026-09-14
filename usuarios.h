@@ -32,6 +32,11 @@ int usuarioExiste(
     const GestorUsuarios *gestor,
     const char *identificacion);
 
+int obtenerNombreUsuario(
+    const GestorUsuarios *gestor,
+    const char *identificacion,
+    const char **nombre);
+
 int aumentarRegistrosAsociados(
     GestorUsuarios *gestor,
     const char *identificacion);
