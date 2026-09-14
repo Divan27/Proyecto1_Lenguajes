@@ -39,6 +39,11 @@ int ejemplarEstaDisponible(
     const GestorPrestamos *gestor,
     const char *identificadorEjemplar);
 
+void mostrarEstadisticas(
+    const GestorPrestamos *gestor,
+    const Catalogo *catalogo,
+    const GestorUsuarios *usuarios);
+
 void destruirGestorPrestamos(
     GestorPrestamos *gestor);
 
