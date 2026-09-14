@@ -8,6 +8,7 @@
 #include "catalogo.h"
 #include "usuarios.h"
 #include "prestamos.h"
+#include "historial.h"
 
 struct Sistema
 {
@@ -33,6 +34,8 @@ static void ejecutarMenuGeneral(
 
 static void ejecutarGestionUsuarios(
     GestorUsuarios *gestor);
+
+static void ejecutarHistorialPrestamos(void);
 
 Sistema *crearSistema(void)
 {
@@ -223,8 +226,7 @@ static void ejecutarMenuOperativo(
 
         case 3:
 
-            mostrarOpcionNoImplementada(
-                "Historial de prestamos");
+            ejecutarHistorialPrestamos();
 
             break;
 
@@ -289,7 +291,7 @@ static void ejecutarMenuGeneral(
 
         case 3:
         {
-            /* Datos necesarios para registrar un nuevo prestamo. */
+
             char *usuario;
             char *fechaInicio;
             char *fechaEntrega;
@@ -802,6 +804,98 @@ static void ejecutarGestionUsuarios(GestorUsuarios *gestor)
             break;
         }
     }
+}
+
+static void ejecutarHistorialPrestamos(void)
+{
+    char *fechaInicio;
+
+    char *fechaFin;
+
+    printf("\n");
+    printf("=========================================\n");
+    printf("        HISTORIAL DE PRESTAMOS\n");
+    printf("=========================================\n");
+
+    printf(
+        "Fecha inicial (AAAA-MM-DD): ");
+
+    fechaInicio =
+        leerLineaDinamica();
+
+    if (fechaInicio == NULL)
+    {
+        printf(
+            "\nNo fue posible leer la fecha inicial.\n");
+
+        return;
+    }
+
+    printf(
+        "Fecha final (AAAA-MM-DD): ");
+
+    fechaFin =
+        leerLineaDinamica();
+
+    if (fechaFin == NULL)
+    {
+        free(
+            fechaInicio);
+
+        printf(
+            "\nNo fue posible leer la fecha final.\n");
+
+        return;
+    }
+
+    if (
+        !fechaValida(
+            fechaInicio))
+    {
+        printf(
+            "\nLa fecha inicial no es valida.\n");
+
+        printf(
+            "Debe utilizar el formato AAAA-MM-DD.\n");
+
+        free(
+            fechaInicio);
+
+        free(
+            fechaFin);
+
+        return;
+    }
+
+    if (
+        !fechaValida(
+            fechaFin))
+    {
+        printf(
+            "\nLa fecha final no es valida.\n");
+
+        printf(
+            "Debe utilizar el formato AAAA-MM-DD.\n");
+
+        free(
+            fechaInicio);
+
+        free(
+            fechaFin);
+
+        return;
+    }
+
+    mostrarHistorialPrestamos(
+        ARCHIVO_PRESTAMOS,
+        fechaInicio,
+        fechaFin);
+
+    free(
+        fechaInicio);
+
+    free(
+        fechaFin);
 }
 
 void destruirSistema(Sistema *sistema)

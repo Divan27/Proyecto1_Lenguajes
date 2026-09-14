@@ -1,4 +1,16 @@
 {
-    "siguienteId": 1,
-    "prestamos": []
+	"siguienteId":	2,
+	"prestamos":	[{
+			"identificador":	"PRE-1",
+			"usuario":	"118010795",
+			"fechaInicio":	"2026-09-13",
+			"fechaEntrega":	"2027-09-13",
+			"estado":	"FINALIZADO",
+			"monto":	36600,
+			"fechaDevolucion":	"2027-09-13",
+			"ejemplares":	[{
+					"identificador":	"LIB-3-EJ-1",
+					"nombre":	"Orgullo y prejuicio"
+				}]
+		}]
 }
