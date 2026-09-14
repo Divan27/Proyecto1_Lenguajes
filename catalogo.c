@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-
+#include "prestamos.h"
 #include "catalogo.h"
 #include "configuracion.h"
 #include "cJSON.h"
@@ -106,6 +106,56 @@ static int guardarCatalogoJson(
 
 static char *leerArchivoCompleto(
     const char *rutaArchivo);
+
+static int contieneTexto(
+    const char *texto,
+    const char *busqueda);
+
+/* ============================= */
+/* contieneTexto                */
+/* ============================= */
+
+static int contieneTexto(
+    const char *texto,
+    const char *busqueda)
+{
+    size_t longitudTexto;
+    size_t longitudBusqueda;
+    size_t i;
+    size_t j;
+
+    if (texto == NULL || busqueda == NULL)
+    {
+        return 0;
+    }
+
+    longitudTexto = strlen(texto);
+    longitudBusqueda = strlen(busqueda);
+
+    if (longitudBusqueda == 0 || longitudBusqueda > longitudTexto)
+    {
+        return 0;
+    }
+
+    for (i = 0; i <= longitudTexto - longitudBusqueda; i++)
+    {
+        for (j = 0; j < longitudBusqueda; j++)
+        {
+            if (tolower((unsigned char)texto[i + j]) !=
+                tolower((unsigned char)busqueda[j]))
+            {
+                break;
+            }
+        }
+
+        if (j == longitudBusqueda)
+        {
+            return 1;
+        }
+    }
+
+    return 0;
+}
 
 /* ============================= */
 /* CREAR CATALOGO                */
@@ -1514,6 +1564,93 @@ int obtenerNombreEjemplar(
 
     *nombreLibro = NULL;
     return 0;
+}
+
+void buscarCatalogoSimple(
+    const Catalogo *catalogo,
+    const struct GestorPrestamos *gestorPrestamos,
+    const char *texto)
+{
+    int i;
+    int encontrados = 0;
+
+    if (catalogo == NULL || gestorPrestamos == NULL || texto == NULL)
+    {
+        return;
+    }
+
+    if (strlen(texto) == 0)
+    {
+        printf("\nDebe ingresar un texto para buscar.\n");
+        return;
+    }
+
+    printf("\n");
+    printf("=========================================\n");
+    printf("            BUSQUEDA SIMPLE\n");
+    printf("=========================================\n");
+    printf("Texto buscado: %s\n", texto);
+
+    for (i = 0; i < catalogo->cantidadLibros; i++)
+    {
+        const Libro *libro = &catalogo->libros[i];
+        int coincide;
+        int j;
+
+        coincide =
+            contieneTexto(libro->nombre, texto) ||
+            contieneTexto(libro->autor, texto) ||
+            contieneTexto(libro->resumen, texto);
+
+        if (!coincide)
+        {
+            continue;
+        }
+
+        for (j = 0; j < libro->cantidad; j++)
+        {
+            const char *identificador =
+                libro->ejemplares[j].identificador;
+
+            printf("\n-----------------------------------------\n");
+
+            printf(
+                "Identificador: %s\n",
+                identificador);
+
+            printf(
+                "Nombre: %s\n",
+                libro->nombre);
+
+            printf(
+                "Resumen: %s\n",
+                libro->resumen);
+
+            printf(
+                "Estado: %s\n",
+                ejemplarEstaDisponible(
+                    gestorPrestamos,
+                    identificador)
+                    ? "DISPONIBLE"
+                    : "NO DISPONIBLE");
+
+            encontrados++;
+        }
+    }
+
+    if (encontrados == 0)
+    {
+        printf(
+            "\nNo se encontraron ejemplares que coincidan.\n");
+    }
+    else
+    {
+        printf("\n=========================================\n");
+
+        printf(
+            "Ejemplares encontrados: %d\n",
+            encontrados);
+    }
 }
 
 void destruirCatalogo(
