@@ -1594,6 +1594,41 @@ int obtenerNombreEjemplar(
     return 0;
 }
 
+int obtenerGeneroPorNombre(
+    const Catalogo *catalogo,
+    const char *nombreLibro,
+    const char **genero)
+{
+    int i;
+
+    if (
+        catalogo == NULL ||
+        nombreLibro == NULL ||
+        genero == NULL)
+    {
+        return 0;
+    }
+
+    for (i = 0; i < catalogo->cantidadLibros; i++)
+    {
+        if (
+            strcmp(
+                catalogo->libros[i].nombre,
+                nombreLibro) == 0)
+        {
+            *genero =
+                catalogo->libros[i].genero;
+
+            return 1;
+        }
+    }
+
+    *genero = NULL;
+
+    return 0;
+}
+
+
 void buscarCatalogoSimple(
     const Catalogo *catalogo,
     const struct GestorPrestamos *gestorPrestamos,
