@@ -303,11 +303,211 @@ static void ejecutarMenuGeneral(
         }
 
         case 2:
+        {
+            char *nombre = NULL;
+            char *autor = NULL;
+            char *genero = NULL;
+            char *resumen = NULL;
 
-            mostrarOpcionNoImplementada(
-                "Busqueda avanzada");
+            int tecnicaNombre = 1;
+            int tecnicaAutor = 1;
+            int tecnicaGenero = 1;
+            int tecnicaResumen = 1;
+
+            int operador = 1;
+
+            int cantidadCriterios = 0;
+
+            /* ========================= */
+            /* NOMBRE                    */
+            /* ========================= */
+
+            printf(
+                "\nNombre (vacio = no buscar): ");
+
+            nombre =
+                leerLineaDinamica();
+
+            if (nombre == NULL)
+            {
+                printf(
+                    "\nNo fue posible leer el nombre.\n");
+
+                break;
+            }
+
+            if (nombre[0] != '\0')
+            {
+                do
+                {
+                    tecnicaNombre =
+                        leerEntero(
+                            "Tecnica para nombre "
+                            "(1=contiene, 2=exacta): ");
+
+                } while (
+                    tecnicaNombre != 1 &&
+                    tecnicaNombre != 2);
+
+                cantidadCriterios++;
+            }
+
+            /* ========================= */
+            /* AUTOR                     */
+            /* ========================= */
+
+            printf(
+                "Autor (vacio = no buscar): ");
+
+            autor =
+                leerLineaDinamica();
+
+            if (autor == NULL)
+            {
+                printf(
+                    "\nNo fue posible leer el autor.\n");
+
+                free(nombre);
+
+                break;
+            }
+
+            if (autor[0] != '\0')
+            {
+                do
+                {
+                    tecnicaAutor =
+                        leerEntero(
+                            "Tecnica para autor "
+                            "(1=contiene, 2=exacta): ");
+
+                } while (
+                    tecnicaAutor != 1 &&
+                    tecnicaAutor != 2);
+
+                cantidadCriterios++;
+            }
+
+            /* ========================= */
+            /* GENERO                    */
+            /* ========================= */
+
+            printf(
+                "Genero (vacio = no buscar): ");
+
+            genero =
+                leerLineaDinamica();
+
+            if (genero == NULL)
+            {
+                printf(
+                    "\nNo fue posible leer el genero.\n");
+
+                free(nombre);
+                free(autor);
+
+                break;
+            }
+
+            if (genero[0] != '\0')
+            {
+                do
+                {
+                    tecnicaGenero =
+                        leerEntero(
+                            "Tecnica para genero "
+                            "(1=contiene, 2=exacta): ");
+
+                } while (
+                    tecnicaGenero != 1 &&
+                    tecnicaGenero != 2);
+
+                cantidadCriterios++;
+            }
+
+            /* ========================= */
+            /* RESUMEN                   */
+            /* ========================= */
+
+            printf(
+                "Resumen (vacio = no buscar): ");
+
+            resumen =
+                leerLineaDinamica();
+
+            if (resumen == NULL)
+            {
+                printf(
+                    "\nNo fue posible leer el resumen.\n");
+
+                free(nombre);
+                free(autor);
+                free(genero);
+
+                break;
+            }
+
+            if (resumen[0] != '\0')
+            {
+                do
+                {
+                    tecnicaResumen =
+                        leerEntero(
+                            "Tecnica para resumen "
+                            "(1=contiene, 2=exacta): ");
+
+                } while (
+                    tecnicaResumen != 1 &&
+                    tecnicaResumen != 2);
+
+                cantidadCriterios++;
+            }
+
+            /* ========================= */
+            /* OPERADOR O / Y            */
+            /* ========================= */
+
+            if (cantidadCriterios >= 2)
+            {
+                do
+                {
+                    operador =
+                        leerEntero(
+                            "Operador entre campos "
+                            "(1=O, 2=Y): ");
+
+                } while (
+                    operador != 1 &&
+                    operador != 2);
+            }
+
+            /* ========================= */
+            /* REALIZAR BUSQUEDA         */
+            /* ========================= */
+
+            buscarCatalogoAvanzado(
+                sistema->catalogo,
+                nombre,
+                tecnicaNombre,
+                autor,
+                tecnicaAutor,
+                genero,
+                tecnicaGenero,
+                resumen,
+                tecnicaResumen,
+                operador);
+
+            /* ========================= */
+            /* LIBERAR MEMORIA           */
+            /* ========================= */
+
+            free(nombre);
+            free(autor);
+            free(genero);
+            free(resumen);
 
             break;
+        }
 
         case 3:
         {
