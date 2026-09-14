@@ -3,6 +3,8 @@
 
 typedef struct Catalogo Catalogo;
 
+struct GestorPrestamos;
+
 Catalogo *crearCatalogo(void);
 
 int cargarCatalogoDesdeJson(
@@ -17,6 +19,11 @@ void incluirCatalogoPorLote(
 void mostrarCatalogo(
     const Catalogo *catalogo);
 
+    void buscarCatalogoSimple(
+    const Catalogo *catalogo,
+    const struct GestorPrestamos *gestorPrestamos,
+    const char *texto);
+    
 int obtenerNombreEjemplar(
     const Catalogo *catalogo,
     const char *identificador,
