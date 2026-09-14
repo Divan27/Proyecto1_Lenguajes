@@ -29,6 +29,11 @@ int obtenerNombreEjemplar(
     const char *identificador,
     const char **nombreLibro);
 
+int obtenerGeneroPorNombre(
+    const Catalogo *catalogo,
+    const char *nombreLibro,
+    const char **genero);
+
 void buscarCatalogoAvanzado(
     const Catalogo *catalogo,
     const char *nombre, int tecnicaNombre,
