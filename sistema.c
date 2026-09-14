@@ -277,10 +277,30 @@ static void ejecutarMenuGeneral(
         {
         case 1:
 
-            mostrarOpcionNoImplementada(
-                "Busqueda simple");
-
+        {
+            char *texto;
+        
+            printf("\nTexto a buscar: ");
+        
+            texto = leerLineaDinamica();
+        
+            if (texto == NULL)
+            {
+                printf(
+                    "\nNo fue posible leer el texto.\n");
+        
+                break;
+            }
+        
+            buscarCatalogoSimple(
+                sistema->catalogo,
+                sistema->gestorPrestamos,
+                texto);
+        
+            free(texto);
+        
             break;
+        }
 
         case 2:
 
