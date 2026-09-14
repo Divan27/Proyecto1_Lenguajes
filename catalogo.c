@@ -111,6 +111,11 @@ static int contieneTexto(
     const char *texto,
     const char *busqueda);
 
+static int coincideCampo(
+    const char *campo,
+    const char *busqueda,
+    int tecnica);
+
 /* ============================= */
 /* contieneTexto                */
 /* ============================= */
@@ -463,6 +468,29 @@ static int textosIguales(
         texto1[posicion] == '\0' &&
         texto2[posicion] == '\0');
 }
+
+
+/* ============================= */
+/* COINCIDENCIA DE CAMPO         */
+/* ============================= */
+
+static int coincideCampo(
+    const char *campo,
+    const char *busqueda,
+    int tecnica)
+{
+    if (tecnica == 2)
+    {
+        return textosIguales(
+            campo,
+            busqueda);
+    }
+
+    return contieneTexto(
+        campo,
+        busqueda);
+}
+
 
 /* ============================= */
 /* BUSCAR DUPLICADO              */
@@ -1652,6 +1680,237 @@ void buscarCatalogoSimple(
             encontrados);
     }
 }
+
+
+void buscarCatalogoAvanzado(
+    const Catalogo *catalogo,
+    const char *nombre, int tecnicaNombre,
+    const char *autor, int tecnicaAutor,
+    const char *genero, int tecnicaGenero,
+    const char *resumen, int tecnicaResumen,
+    int operador)
+{
+    int i;
+    int encontrados = 0;
+    int criteriosActivos = 0;
+
+    if (catalogo == NULL)
+    {
+        return;
+    }
+
+    /*
+     * Contamos cuantos campos tienen texto.
+     * Los campos vacios no participan en la busqueda.
+     */
+
+    if (nombre != NULL && nombre[0] != '\0')
+    {
+        criteriosActivos++;
+    }
+
+    if (autor != NULL && autor[0] != '\0')
+    {
+        criteriosActivos++;
+    }
+
+    if (genero != NULL && genero[0] != '\0')
+    {
+        criteriosActivos++;
+    }
+
+    if (resumen != NULL && resumen[0] != '\0')
+    {
+        criteriosActivos++;
+    }
+
+    if (criteriosActivos == 0)
+    {
+        printf(
+            "\nDebe ingresar al menos un criterio de busqueda.\n");
+
+        return;
+    }
+
+    printf("\n");
+    printf("=========================================\n");
+    printf("           BUSQUEDA AVANZADA\n");
+    printf("=========================================\n");
+
+    for (i = 0; i < catalogo->cantidadLibros; i++)
+    {
+        const Libro *libro =
+            &catalogo->libros[i];
+
+        int coincide;
+        int j;
+
+        if (operador == 2)
+        {
+            coincide = 1;
+        }
+        else
+        {
+            coincide = 0;
+        }
+
+        /* ========================= */
+        /* NOMBRE                    */
+        /* ========================= */
+
+        if (
+            nombre != NULL &&
+            nombre[0] != '\0')
+        {
+            int resultado =
+                coincideCampo(
+                    libro->nombre,
+                    nombre,
+                    tecnicaNombre);
+
+            if (operador == 2)
+            {
+                coincide =
+                    coincide &&
+                    resultado;
+            }
+            else
+            {
+                coincide =
+                    coincide ||
+                    resultado;
+            }
+        }
+
+        /* ========================= */
+        /* AUTOR                     */
+        /* ========================= */
+
+        if (
+            autor != NULL &&
+            autor[0] != '\0')
+        {
+            int resultado =
+                coincideCampo(
+                    libro->autor,
+                    autor,
+                    tecnicaAutor);
+
+            if (operador == 2)
+            {
+                coincide =
+                    coincide &&
+                    resultado;
+            }
+            else
+            {
+                coincide =
+                    coincide ||
+                    resultado;
+            }
+        }
+
+        /* ========================= */
+        /* GENERO                    */
+        /* ========================= */
+
+        if (
+            genero != NULL &&
+            genero[0] != '\0')
+        {
+            int resultado =
+                coincideCampo(
+                    libro->genero,
+                    genero,
+                    tecnicaGenero);
+
+            if (operador == 2)
+            {
+                coincide =
+                    coincide &&
+                    resultado;
+            }
+            else
+            {
+                coincide =
+                    coincide ||
+                    resultado;
+            }
+        }
+
+        /* ========================= */
+        /* RESUMEN                   */
+        /* ========================= */
+
+        if (
+            resumen != NULL &&
+            resumen[0] != '\0')
+        {
+            int resultado =
+                coincideCampo(
+                    libro->resumen,
+                    resumen,
+                    tecnicaResumen);
+
+            if (operador == 2)
+            {
+                coincide =
+                    coincide &&
+                    resultado;
+            }
+            else
+            {
+                coincide =
+                    coincide ||
+                    resultado;
+            }
+        }
+
+        
+
+        if (!coincide)
+        {
+            continue;
+        }
+
+        
+
+        for (j = 0; j < libro->cantidad; j++)
+        {
+            printf(
+                "\n-----------------------------------------\n");
+
+            printf(
+                "Identificador: %s\n",
+                libro->ejemplares[j].identificador);
+
+            printf(
+                "Nombre: %s\n",
+                libro->nombre);
+
+            printf(
+                "Resumen: %s\n",
+                libro->resumen);
+
+            encontrados++;
+        }
+    }
+
+    if (encontrados == 0)
+    {
+        printf(
+            "\nNo se encontraron ejemplares que coincidan.\n");
+    }
+    else
+    {
+        printf("\n=========================================\n");
+
+        printf(
+            "Ejemplares encontrados: %d\n",
+            encontrados);
+    }
+}
+
 
 void destruirCatalogo(
     Catalogo *catalogo)
