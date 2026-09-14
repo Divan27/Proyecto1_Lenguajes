@@ -241,8 +241,10 @@ static void ejecutarMenuOperativo(
 
         case 5:
 
-            mostrarOpcionNoImplementada(
-                "Estadisticas");
+            mostrarEstadisticas(
+                sistema->gestorPrestamos,
+                sistema->catalogo,
+                sistema->gestorUsuarios);
 
             break;
 
