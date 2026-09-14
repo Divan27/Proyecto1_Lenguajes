@@ -35,6 +35,10 @@ int registrarDevolucion(
     const char *fechaDevolucion,
     const char *rutaPrestamos);
 
+int ejemplarEstaDisponible(
+    const GestorPrestamos *gestor,
+    const char *identificadorEjemplar);
+
 void destruirGestorPrestamos(
     GestorPrestamos *gestor);
 
