@@ -9,6 +9,7 @@
 #include "usuarios.h"
 #include "prestamos.h"
 #include "historial.h"
+#include "vencimientos.h"
 
 struct Sistema
 {
@@ -36,6 +37,8 @@ static void ejecutarGestionUsuarios(
     GestorUsuarios *gestor);
 
 static void ejecutarHistorialPrestamos(void);
+
+static void ejecutarVencimientosPrestamos(void);
 
 Sistema *crearSistema(void)
 {
@@ -232,8 +235,7 @@ static void ejecutarMenuOperativo(
 
         case 4:
 
-            mostrarOpcionNoImplementada(
-                "Vencimiento de prestamos");
+            ejecutarVencimientosPrestamos();
 
             break;
 
@@ -896,6 +898,12 @@ static void ejecutarHistorialPrestamos(void)
 
     free(
         fechaFin);
+}
+
+static void ejecutarVencimientosPrestamos(void)
+{
+    mostrarVencimientosPrestamos(
+        ARCHIVO_PRESTAMOS);
 }
 
 void destruirSistema(Sistema *sistema)

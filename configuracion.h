@@ -34,4 +34,6 @@
 
 #define CANTIDAD_MINIMA 1
 
+#define DIAS_PROXIMO_VENCIMIENTO 5
+
 #endif
